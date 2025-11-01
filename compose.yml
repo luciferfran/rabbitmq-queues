@@ -1,0 +1,26 @@
+services:
+  rabbitmq:
+    # Imagen actual y estable con el plugin de administración
+    image: rabbitmq:3.13-management-alpine
+    container_name: rabbitmq
+
+    # Reinicia automáticamente si falla, excepto si se detiene manually
+    restart: unless-stopped
+
+    ports:
+      # 5672: Puerto AMQP para la conexión de PHP
+      - "${RABBITMQ_PORT:-5672}:5672"
+      # 15672: Puerto HTTP para la interfaz de administración web
+      - "${RABBITMQ_MANAGEMENT_PORT:-15672}:15672"
+
+    environment:
+      # Define credenciales personalizadas para mayor seguridad
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_DEFAULT_USER:-user}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_DEFAULT_PASS:-password}
+
+    # Mapea un volumen para la persistencia de datos (colas, mensajes, etc.)
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq/
+
+volumes:
+  rabbitmq_data:

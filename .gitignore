@@ -1,0 +1,4 @@
+/rabbitmq_data
+/vendor
+.env
+.php-cs-fixer.cache

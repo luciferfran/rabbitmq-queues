@@ -1,0 +1,21 @@
+parameters:
+    # Nivel de reglas (0-9, donde 9 es el más estricto)
+    level: 6
+
+    # Rutas a analizar
+    paths:
+        - consumer_email.php
+        - producer_registro.php
+        - config_topology.php
+
+    # Excluir directorios/archivos
+    excludePaths:
+        - vendor/*
+
+    # Tratamiento de errores
+    treatPhpDocTypesAsCertain: false
+
+    # Configuración específica para nuestra aplicación
+    ignoreErrors:
+        # Aquí podemos añadir patrones de errores a ignorar si es necesario
+        # - '#PHPDoc tag @var#'

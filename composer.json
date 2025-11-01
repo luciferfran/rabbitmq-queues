@@ -1,0 +1,34 @@
+{
+    "name": "luciferfran/rabbitmq-queues",
+    "description": "A project to learn about queues",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Francisco",
+            "email": "luciferfran@gmail.com"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "App\\": "src/"
+        }
+    },
+    "scripts": {
+        "analyze": "phpstan analyse -c phpstan.neon",
+        "analyze:strict": "phpstan analyse -c phpstan.neon --level=max",
+        "format": "php-cs-fixer fix --config=.php-cs-fixer.php",
+        "format:dry-run": "php-cs-fixer fix --config=.php-cs-fixer.php --dry-run --diff"
+    },
+    "require": {
+        "php": ">=8.0",
+        "ext-sockets": "*",
+        "ext-bcmath": "*",
+        "ext-json": "*",
+        "php-amqplib/php-amqplib": "^2.10",
+        "vlucas/phpdotenv": "^5.0"
+    },
+    "require-dev": {
+        "phpstan/phpstan": "2.1.31",
+        "friendsofphp/php-cs-fixer": "3.89.1"
+    }
+}
