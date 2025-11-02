@@ -28,7 +28,7 @@ class Topology
         // Declare exchanges
         $channel->exchange_declare(
             exchange: 'main_registro_exchange',
-            type: type: 'topic',
+            type: 'topic',
             passive: false,
             durable: true,
             auto_delete: false
