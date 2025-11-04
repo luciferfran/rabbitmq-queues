@@ -1,3 +1,5 @@
+[![CI/CD Status](https://github.com/luciferfran/rabbitmq-queues/actions/workflows/ci.yml/badge.svg)](https://github.com/luciferfran/rabbitmq-queues/actions)
+
 # RabbitMQ Queues Project
 
 A simple project to demonstrate the use of RabbitMQ with PHP.
