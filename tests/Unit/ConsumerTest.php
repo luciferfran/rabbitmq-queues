@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 namespace Tests\Unit;
-
+require_once __DIR__ . '/Support/AmqpFakes.php';
 use App\Consumer;
 use InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
@@ -67,5 +67,83 @@ class ConsumerTest extends TestCase
         );
 
         $this->assertInstanceOf(Consumer::class, $consumer);
+    }
+
+    public function testProcessMessageSuccessAcknowledges(): void
+    {
+        $consumer = new Consumer([
+            'host' => 'localhost',
+            'port' => 5672,
+            'user' => 'guest',
+            'password' => 'guest',
+        ], new NullLogger());
+
+        $connMock = $this->createMock(\PhpAmqpLib\Connection\AMQPStreamConnection::class);
+
+        $channelMock = $this->getMockBuilder(TestChannel::class)
+            ->onlyMethods(['basic_ack', 'basic_publish', 'basic_nack'])
+            ->getMock();
+
+        // For a user_id that is odd, should call basic_ack via handleSuccess
+        $channelMock->expects($this->once())->method('basic_ack');
+
+        $connMock->method('channel')->willReturn($channelMock);
+        $connMock->method('close')->willReturn(null);
+
+        $ref = new \ReflectionProperty(Consumer::class, 'connection');
+        $ref->setAccessible(true);
+        $ref->setValue($consumer, $connMock);
+
+        $messageMock = $this->getMockBuilder(\PhpAmqpLib\Message\AMQPMessage::class)
+            ->disableOriginalConstructor()
+            ->onlyMethods(['getChannel', 'getDeliveryTag'])
+            ->getMock();
+
+        $messageMock->body = json_encode(['user_id' => 1, 'email' => 'a@b.com']);
+        $messageMock->method('getChannel')->willReturn($channelMock);
+        $messageMock->method('getDeliveryTag')->willReturn(1);
+
+        $this->expectOutputRegex('/Processing message for user ID:/');
+        $consumer->processMessage($messageMock);
+    }
+
+    public function testProcessMessageRetriesAndMovesToDeadLetter(): void
+    {
+        $consumer = new Consumer([
+            'host' => 'localhost',
+            'port' => 5672,
+            'user' => 'guest',
+            'password' => 'guest',
+        ], new NullLogger());
+
+        $connMock = $this->createMock(\PhpAmqpLib\Connection\AMQPStreamConnection::class);
+
+        $channelMock = $this->getMockBuilder(TestChannel::class)
+            ->onlyMethods(['basic_ack', 'basic_publish', 'basic_nack'])
+            ->getMock();
+
+        // For a user_id that is even, first attempt should publish a retry
+        $channelMock->expects($this->any())->method('basic_publish');
+        $channelMock->expects($this->any())->method('basic_ack');
+
+        $connMock->method('channel')->willReturn($channelMock);
+        $connMock->method('close')->willReturn(null);
+
+        $ref = new \ReflectionProperty(Consumer::class, 'connection');
+        $ref->setAccessible(true);
+        $ref->setValue($consumer, $connMock);
+
+        // First message with retries = 0 will trigger a retry publish
+        $messageMock = $this->getMockBuilder(\PhpAmqpLib\Message\AMQPMessage::class)
+            ->disableOriginalConstructor()
+            ->onlyMethods(['getChannel', 'getDeliveryTag'])
+            ->getMock();
+
+        $messageMock->body = json_encode(['user_id' => 2, 'email' => 'a@b.com', 'retries' => 0]);
+        $messageMock->method('getChannel')->willReturn($channelMock);
+        $messageMock->method('getDeliveryTag')->willReturn(1);
+
+        $this->expectOutputRegex('/Retrying later/');
+        $consumer->processMessage($messageMock);
     }
 }

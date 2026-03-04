@@ -227,10 +227,7 @@ class Consumer
     {
         $this->logger->info('Email sent successfully', ['user_id' => $data['user_id'], 'email' => $data['email']]);
 
-        echo sprintf(
-            format: "Email sent successfully to %s\n",
-            values: $data['email']
-        );
+        echo sprintf("Email sent successfully to %s\n", $data['email']);
 
         $channel->basic_ack(delivery_tag: (string)$message->getDeliveryTag());
     }
