@@ -17,6 +17,7 @@ jobs:
       uses: shivammathur/setup-php@v2
       with:
         php-version: '8.4'
+        coverage: pcov
 
     - name: Install Dependencies
       run: composer install --prefer-dist --no-progress
@@ -26,3 +27,9 @@ jobs:
 
     - name: Run PHPStan
       run: composer analyze
+
+    - name: Run Tests
+      run: composer test
+
+    - name: Run Coverage
+      run: composer test:coverage

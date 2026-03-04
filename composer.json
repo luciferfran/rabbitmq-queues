@@ -19,7 +19,8 @@
         "format": "php-cs-fixer fix --config=.php-cs-fixer.php",
         "format:dry-run": "php-cs-fixer fix --config=.php-cs-fixer.php --dry-run --diff",
         "commit": "commitlint --edit",
-        "test": "phpunit"
+        "test": "phpunit",
+        "test:coverage": "phpunit --coverage-text"
     },
     "require": {
         "php": ">=8.4",

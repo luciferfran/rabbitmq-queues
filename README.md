@@ -1,4 +1,5 @@
 [![CI/CD Status](https://github.com/luciferfran/rabbitmq-queues/actions/workflows/ci.yml/badge.svg)](https://github.com/luciferfran/rabbitmq-queues/actions)
+[![Coverage](https://codecov.io/gh/luciferfran/rabbitmq-queues/branch/main/graph/badge.svg)](https://codecov.io/gh/luciferfran/rabbitmq-queues)
 
 # RabbitMQ Queues Project
 
@@ -18,6 +19,8 @@ A simple project to demonstrate the use of RabbitMQ with PHP.
 - `composer analyze:strict` - Run PHPStan with maximum strictness.
 - `composer format` - Format the code with PHP-CS-Fixer.
 - `composer format:dry-run` - Check code formatting without modifying files.
+- `composer test` - Run PHPUnit tests.
+- `composer test:coverage` - Run tests with code coverage.
 - `composer commit` - Create a commit with commitlint validation.
 
 ## Usage
