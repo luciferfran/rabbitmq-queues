@@ -21,7 +21,7 @@
         "commit": "commitlint --edit"
     },
     "require": {
-        "php": ">=8.4",
+        "php": ">=8.3",
         "ext-sockets": "*",
         "ext-bcmath": "*",
         "ext-json": "*",
