@@ -20,7 +20,7 @@
         "format:dry-run": "php-cs-fixer fix --config=.php-cs-fixer.php --dry-run --diff",
         "commit": "commitlint --edit",
         "test": "phpunit",
-        "test:coverage": "phpunit --coverage-text"
+        "test:coverage": "phpunit --coverage-clover=coverage.xml"
     },
     "require": {
         "php": ">=8.4",
