@@ -2,56 +2,25 @@
 
 declare(strict_types=1);
 
+require_once __DIR__ . '/vendor/autoload.php';
+
+use Monolog\Handler\StreamHandler;
+use Monolog\Logger;
+
+$logger = new Logger('producer');
+$logger->pushHandler(new StreamHandler('logs/producer.log', Logger::INFO));
+
 $config = require_once __DIR__ . '/bootstrap.php';
 
-use PhpAmqpLib\Connection\AMQPStreamConnection;
-use PhpAmqpLib\Message\AMQPMessage;
+$producer = new App\Producer($config['rabbitmq'], $logger);
 
-// Configuración de la conexión
-$connection = new AMQPStreamConnection(
-    host: $config['rabbitmq']['host'],
-    port: $config['rabbitmq']['port'],
-    user: $config['rabbitmq']['user'],
-    password: $config['rabbitmq']['password']
-);
-
-$channel = $connection->channel();
-
-// Declarar el exchange
-$channel->exchange_declare(
-    exchange: 'main_registro_exchange',
-    type: 'topic',
-    passive: false,
-    durable: true,
-    auto_delete: false
-);
-
-// Datos de ejemplo del usuario
 $userData = [
-    'user_id' => 2,  // ID par que provocará un fallo
+    'user_id' => 2,
     'email' => 'nuevo.usuario@ejemplo.com',
     'name' => 'John Doe',
-    'retries' => 0, // Contador de reintentos
+    'retries' => 0,
 ];
 
-// Crear el mensaje
-$message = new AMQPMessage(
-    body: json_encode($userData),
-    properties: [
-        'delivery_mode' => AMQPMessage::DELIVERY_MODE_PERSISTENT,
-        'content_type' => 'application/json',
-    ]
-);
-
-// Publicar el mensaje
-$channel->basic_publish(
-    msg: $message,
-    exchange: 'main_registro_exchange',
-    routing_key: 'registro.email'
-);
+$producer->publish($userData);
 
 echo 'Mensaje enviado para el usuario ID: ' . $userData['user_id'] . "\n";
-
-// Cerrar la conexión
-$channel->close();
-$connection->close();
