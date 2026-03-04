@@ -1,0 +1,25 @@
+{
+  "name": "colas",
+  "version": "1.0.0",
+  "description": "[![CI/CD Status](https://github.com/luciferfran/rabbitmq-queues/actions/workflows/ci.yml/badge.svg)](https://github.com/luciferfran/rabbitmq-queues/actions)",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/luciferfran/rabbitmq-queues.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/luciferfran/rabbitmq-queues/issues"
+  },
+  "homepage": "https://github.com/luciferfran/rabbitmq-queues#readme",
+  "devDependencies": {
+    "@commitlint/cli": "^20.4.3",
+    "@commitlint/config-conventional": "^20.4.3"
+  }
+}
