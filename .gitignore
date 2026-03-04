@@ -1,4 +1,7 @@
 /rabbitmq_data
 /vendor
-.env
-.php-cs-fixer.cache
+/.env
+/.php-cs-fixer.cache
+/logs
+/node_modules
+/package-lock.json
