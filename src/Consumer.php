@@ -15,7 +15,7 @@ class Consumer
 {
     private const MAX_RETRIES = 3;
 
-    private AMQPStreamConnection $connection;
+    private ?AMQPStreamConnection $connection = null;
     private LoggerInterface $logger;
     private array $config;
     private array $queueConfig;
@@ -25,13 +25,20 @@ class Consumer
         $this->logger = $logger ?? new NullLogger();
         $this->config = $this->validateConfig($config);
         $this->queueConfig = $this->validateQueueConfig($queueConfig);
+    }
 
-        $this->connection = new AMQPStreamConnection(
-            host: $this->config['host'],
-            port: $this->config['port'],
-            user: $this->config['user'],
-            password: $this->config['password']
-        );
+    private function getConnection(): AMQPStreamConnection
+    {
+        if ($this->connection === null) {
+            $this->connection = new AMQPStreamConnection(
+                host: $this->config['host'],
+                port: $this->config['port'],
+                user: $this->config['user'],
+                password: $this->config['password']
+            );
+        }
+
+        return $this->connection;
     }
 
     private function validateConfig(array $config): array
@@ -65,7 +72,7 @@ class Consumer
 
     public function run(): void
     {
-        $channel = $this->connection->channel();
+        $channel = $this->getConnection()->channel();
 
         $channel->basic_qos(prefetch_size: 0, prefetch_count: 1, a_global: false);
 
@@ -92,7 +99,7 @@ class Consumer
         }
 
         $channel->close();
-        $this->connection->close();
+        $this->getConnection()->close();
     }
 
     public function processMessage(AMQPMessage $message): void
@@ -230,7 +237,7 @@ class Consumer
 
     public function __destruct()
     {
-        if (isset($this->connection) && $this->connection->isConnected()) {
+        if ($this->connection !== null && $this->connection->isConnected()) {
             $this->connection->close();
         }
     }

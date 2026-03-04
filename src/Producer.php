@@ -13,7 +13,7 @@ use RuntimeException;
 
 class Producer
 {
-    private AMQPStreamConnection $connection;
+    private ?AMQPStreamConnection $connection = null;
     private LoggerInterface $logger;
     private array $config;
     private array $exchangeConfig;
@@ -23,13 +23,20 @@ class Producer
         $this->logger = $logger ?? new NullLogger();
         $this->config = $this->validateConfig($config);
         $this->exchangeConfig = $this->validateExchangeConfig($exchangeConfig);
+    }
 
-        $this->connection = new AMQPStreamConnection(
-            host: $this->config['host'],
-            port: $this->config['port'],
-            user: $this->config['user'],
-            password: $this->config['password']
-        );
+    private function getConnection(): AMQPStreamConnection
+    {
+        if ($this->connection === null) {
+            $this->connection = new AMQPStreamConnection(
+                host: $this->config['host'],
+                port: $this->config['port'],
+                user: $this->config['user'],
+                password: $this->config['password']
+            );
+        }
+
+        return $this->connection;
     }
 
     private function validateConfig(array $config): array
@@ -63,7 +70,7 @@ class Producer
     {
         $this->validateUserData($userData);
 
-        $channel = $this->connection->channel();
+        $channel = $this->getConnection()->channel();
 
         $channel->exchange_declare(
             exchange: $this->exchangeConfig['exchange'],
@@ -102,7 +109,7 @@ class Producer
         echo 'Message sent for user ID: ' . $userData['user_id'] . "\n";
 
         $channel->close();
-        $this->connection->close();
+        $this->getConnection()->close();
     }
 
     private function validateUserData(array $data): void

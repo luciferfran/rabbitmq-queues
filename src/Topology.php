@@ -14,7 +14,7 @@ class Topology
 {
     private const DEFAULT_RETRY_TTL = 30000;
 
-    private AMQPStreamConnection $connection;
+    private ?AMQPStreamConnection $connection = null;
     private LoggerInterface $logger;
     private array $config;
     private array $topologyConfig;
@@ -24,13 +24,20 @@ class Topology
         $this->logger = $logger ?? new NullLogger();
         $this->config = $this->validateConfig($config);
         $this->topologyConfig = $this->validateTopologyConfig($topologyConfig);
+    }
 
-        $this->connection = new AMQPStreamConnection(
-            host: $this->config['host'],
-            port: $this->config['port'],
-            user: $this->config['user'],
-            password: $this->config['password']
-        );
+    private function getConnection(): AMQPStreamConnection
+    {
+        if ($this->connection === null) {
+            $this->connection = new AMQPStreamConnection(
+                host: $this->config['host'],
+                port: $this->config['port'],
+                user: $this->config['user'],
+                password: $this->config['password']
+            );
+        }
+
+        return $this->connection;
     }
 
     private function validateConfig(array $config): array
@@ -75,7 +82,7 @@ class Topology
 
     public function setup(): void
     {
-        $channel = $this->connection->channel();
+        $channel = $this->getConnection()->channel();
         $exchanges = $this->topologyConfig['exchanges'];
         $queues = $this->topologyConfig['queues'];
         $routingKeys = $this->topologyConfig['routing_keys'];
@@ -174,12 +181,12 @@ class Topology
         echo "Topology configured successfully\n";
 
         $channel->close();
-        $this->connection->close();
+        $this->getConnection()->close();
     }
 
     public function __destruct()
     {
-        if (isset($this->connection) && $this->connection->isConnected()) {
+        if ($this->connection !== null && $this->connection->isConnected()) {
             $this->connection->close();
         }
     }

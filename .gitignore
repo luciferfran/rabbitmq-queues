@@ -2,6 +2,7 @@
 /vendor
 /.env
 /.php-cs-fixer.cache
+/.phpunit.cache
 /logs
 /node_modules
 /package-lock.json
