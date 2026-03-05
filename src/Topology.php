@@ -19,7 +19,7 @@ class Topology
     private array $config;
     private array $topologyConfig;
 
-    public function __construct(array $config, LoggerInterface $logger = null, array $topologyConfig = [])
+    public function __construct(array $config, ?LoggerInterface $logger = null, array $topologyConfig = [])
     {
         $this->logger = $logger ?? new NullLogger();
         $this->config = $this->validateConfig($config);

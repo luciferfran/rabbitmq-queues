@@ -18,7 +18,7 @@ class Producer
     private array $config;
     private array $exchangeConfig;
 
-    public function __construct(array $config, LoggerInterface $logger = null, array $exchangeConfig = [])
+    public function __construct(array $config, ?LoggerInterface $logger = null, array $exchangeConfig = [])
     {
         $this->logger = $logger ?? new NullLogger();
         $this->config = $this->validateConfig($config);

@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Tests\Unit;
 
-require_once __DIR__ . '/Support/AmqpFakes.php';
 use App\Consumer;
 use InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
@@ -86,7 +85,6 @@ class ConsumerTest extends TestCase
             ->onlyMethods(['basic_ack', 'basic_publish', 'basic_nack'])
             ->getMock();
 
-        // For a user_id that is odd, should call basic_ack via handleSuccess
         $channelMock->expects($this->once())->method('basic_ack');
 
         $connMock->method('channel')->willReturn($channelMock);
@@ -124,7 +122,6 @@ class ConsumerTest extends TestCase
             ->onlyMethods(['basic_ack', 'basic_publish', 'basic_nack'])
             ->getMock();
 
-        // For a user_id that is even, first attempt should publish a retry
         $channelMock->expects($this->any())->method('basic_publish');
         $channelMock->expects($this->any())->method('basic_ack');
 
@@ -135,7 +132,6 @@ class ConsumerTest extends TestCase
         $ref->setAccessible(true);
         $ref->setValue($consumer, $connMock);
 
-        // First message with retries = 0 will trigger a retry publish
         $messageMock = $this->getMockBuilder(\PhpAmqpLib\Message\AMQPMessage::class)
             ->disableOriginalConstructor()
             ->onlyMethods(['getChannel', 'getDeliveryTag'])
@@ -146,6 +142,54 @@ class ConsumerTest extends TestCase
         $messageMock->method('getDeliveryTag')->willReturn(1);
 
         $this->expectOutputRegex('/Retrying later/');
+        $consumer->processMessage($messageMock);
+    }
+
+    public function testProcessMessageWithInvalidJson(): void
+    {
+        $consumer = new Consumer([
+            'host' => 'localhost',
+            'port' => 5672,
+            'user' => 'guest',
+            'password' => 'guest',
+        ], new NullLogger());
+
+        $channelMock = $this->createMock(\PhpAmqpLib\Channel\AMQPChannel::class);
+        $channelMock->expects($this->once())->method('basic_nack');
+
+        $messageMock = $this->getMockBuilder(\PhpAmqpLib\Message\AMQPMessage::class)
+            ->disableOriginalConstructor()
+            ->onlyMethods(['getChannel', 'getDeliveryTag'])
+            ->getMock();
+
+        $messageMock->body = 'invalid json';
+        $messageMock->method('getChannel')->willReturn($channelMock);
+        $messageMock->method('getDeliveryTag')->willReturn(1);
+
+        $consumer->processMessage($messageMock);
+    }
+
+    public function testProcessMessageWithMissingUserId(): void
+    {
+        $consumer = new Consumer([
+            'host' => 'localhost',
+            'port' => 5672,
+            'user' => 'guest',
+            'password' => 'guest',
+        ], new NullLogger());
+
+        $channelMock = $this->createMock(\PhpAmqpLib\Channel\AMQPChannel::class);
+        $channelMock->expects($this->once())->method('basic_nack');
+
+        $messageMock = $this->getMockBuilder(\PhpAmqpLib\Message\AMQPMessage::class)
+            ->disableOriginalConstructor()
+            ->onlyMethods(['getChannel', 'getDeliveryTag'])
+            ->getMock();
+
+        $messageMock->body = json_encode(['email' => 'a@b.com']);
+        $messageMock->method('getChannel')->willReturn($channelMock);
+        $messageMock->method('getDeliveryTag')->willReturn(1);
+
         $consumer->processMessage($messageMock);
     }
 }

@@ -4,12 +4,30 @@ declare(strict_types=1);
 
 namespace Tests\Unit;
 
-require_once __DIR__ . '/Support/AmqpFakes.php';
 use App\Producer;
 use InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\NullLogger;
 use ReflectionProperty;
+
+class TestChannel
+{
+    public function exchange_declare(...$args)
+    {
+    }
+    public function basic_publish(...$args)
+    {
+    }
+    public function close(...$args)
+    {
+    }
+    public function basic_ack(...$args)
+    {
+    }
+    public function basic_nack(...$args)
+    {
+    }
+}
 
 class ProducerTest extends TestCase
 {

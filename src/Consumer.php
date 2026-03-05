@@ -20,7 +20,7 @@ class Consumer
     private array $config;
     private array $queueConfig;
 
-    public function __construct(array $config, LoggerInterface $logger = null, array $queueConfig = [])
+    public function __construct(array $config, ?LoggerInterface $logger = null, array $queueConfig = [])
     {
         $this->logger = $logger ?? new NullLogger();
         $this->config = $this->validateConfig($config);
