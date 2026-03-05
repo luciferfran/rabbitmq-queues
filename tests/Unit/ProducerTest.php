@@ -4,30 +4,13 @@ declare(strict_types=1);
 
 namespace Tests\Unit;
 
+require_once __DIR__ . '/TestChannel.php';
+
 use App\Producer;
 use InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\NullLogger;
 use ReflectionProperty;
-
-class TestChannel
-{
-    public function exchange_declare(...$args)
-    {
-    }
-    public function basic_publish(...$args)
-    {
-    }
-    public function close(...$args)
-    {
-    }
-    public function basic_ack(...$args)
-    {
-    }
-    public function basic_nack(...$args)
-    {
-    }
-}
 
 class ProducerTest extends TestCase
 {
@@ -155,5 +138,58 @@ class ProducerTest extends TestCase
         $this->expectOutputString("Message sent for user ID: 1\n");
 
         $producer->publish(['user_id' => 1, 'email' => 'test@example.com']);
+    }
+
+    public function testPublishWithCustomExchangeType(): void
+    {
+        $producer = new Producer(
+            [
+                'host' => 'localhost',
+                'port' => 5672,
+                'user' => 'guest',
+                'password' => 'guest',
+            ],
+            new NullLogger(),
+            [
+                'exchange' => 'direct_exchange',
+                'type' => 'direct',
+                'routing_key' => 'direct.key',
+            ]
+        );
+
+        $connMock = $this->createMock(\PhpAmqpLib\Connection\AMQPStreamConnection::class);
+
+        $channelMock = $this->getMockBuilder(TestChannel::class)
+            ->onlyMethods(['exchange_declare', 'basic_publish', 'close'])
+            ->getMock();
+
+        $connMock->method('channel')->willReturn($channelMock);
+        $connMock->method('close')->willReturn(null);
+
+        $ref = new ReflectionProperty(Producer::class, 'connection');
+        $ref->setAccessible(true);
+        $ref->setValue($producer, $connMock);
+
+        $producer->publish(['user_id' => 1, 'email' => 'test@example.com']);
+    }
+
+    public function testDestructorClosesConnection(): void
+    {
+        $producer = new Producer([
+            'host' => 'localhost',
+            'port' => 5672,
+            'user' => 'guest',
+            'password' => 'guest',
+        ]);
+
+        $connMock = $this->createMock(\PhpAmqpLib\Connection\AMQPStreamConnection::class);
+        $connMock->expects($this->once())->method('isConnected')->willReturn(true);
+        $connMock->expects($this->once())->method('close');
+
+        $ref = new ReflectionProperty(Producer::class, 'connection');
+        $ref->setAccessible(true);
+        $ref->setValue($producer, $connMock);
+
+        unset($producer);
     }
 }
