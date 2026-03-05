@@ -3,11 +3,13 @@
 declare(strict_types=1);
 
 namespace Tests\Unit;
+
 require_once __DIR__ . '/Support/AmqpFakes.php';
 use App\Consumer;
 use InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\NullLogger;
+use ReflectionProperty;
 
 class ConsumerTest extends TestCase
 {
@@ -90,7 +92,7 @@ class ConsumerTest extends TestCase
         $connMock->method('channel')->willReturn($channelMock);
         $connMock->method('close')->willReturn(null);
 
-        $ref = new \ReflectionProperty(Consumer::class, 'connection');
+        $ref = new ReflectionProperty(Consumer::class, 'connection');
         $ref->setAccessible(true);
         $ref->setValue($consumer, $connMock);
 
@@ -129,7 +131,7 @@ class ConsumerTest extends TestCase
         $connMock->method('channel')->willReturn($channelMock);
         $connMock->method('close')->willReturn(null);
 
-        $ref = new \ReflectionProperty(Consumer::class, 'connection');
+        $ref = new ReflectionProperty(Consumer::class, 'connection');
         $ref->setAccessible(true);
         $ref->setValue($consumer, $connMock);
 

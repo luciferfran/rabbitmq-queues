@@ -3,11 +3,13 @@
 declare(strict_types=1);
 
 namespace Tests\Unit;
+
 require_once __DIR__ . '/Support/AmqpFakes.php';
 use App\Producer;
 use InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\NullLogger;
+use ReflectionProperty;
 
 class ProducerTest extends TestCase
 {
@@ -128,7 +130,7 @@ class ProducerTest extends TestCase
         $connMock->method('channel')->willReturn($channelMock);
         $connMock->method('close')->willReturn(null);
 
-        $ref = new \ReflectionProperty(Producer::class, 'connection');
+        $ref = new ReflectionProperty(Producer::class, 'connection');
         $ref->setAccessible(true);
         $ref->setValue($producer, $connMock);
 
